@@ -4,6 +4,9 @@ module.exports = {
   entry: "./src/index.js",
   devServer: { port: 3000 },
   output: { clean: true },
+  resolve: {
+    extensions: [".js", ".jsx"],
+  },
   module: {
     rules: [
       {
@@ -18,6 +21,10 @@ module.exports = {
           },
         },
         exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"],
       },
     ],
   },
