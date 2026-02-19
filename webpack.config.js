@@ -1,9 +1,16 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 
 module.exports = {
   entry: "./src/index.js",
-  devServer: { port: 3000 },
-  output: { clean: true },
+  devServer: { 
+    port: 3000,
+    historyApiFallback: true,
+  },
+  output: { 
+    publicPath: "http://localhost:3000/",
+    clean: true,
+  },
   resolve: {
     extensions: [".js", ".jsx"],
   },
@@ -33,6 +40,19 @@ module.exports = {
     ],
   },
   plugins: [
+    new ModuleFederationPlugin({
+      name: "shell",
+      remotes: {
+        mfeAuth: "mfeAuth@http://localhost:4201/remoteEntry.js",
+      },
+      shared: {
+        react: { singleton: true, requiredVersion: false },
+        "react-dom": { singleton: true, requiredVersion: false },
+        "react-router-dom": { singleton: true, requiredVersion: false },
+        "react-redux": { singleton: true, requiredVersion: false },
+        "@reduxjs/toolkit": { singleton: true, requiredVersion: false },
+      },
+    }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
     }),

@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { Navbar, Nav, Container, NavDropdown, Badge } from "react-bootstrap";
 import { FaShoppingCart, FaUser } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import SearchBox from "./SearchBox";
 import logo from "../assets/logo.png";
 
 const Header = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const navigate = useNavigate();
 
-  // Ler estado do localStorage (sincronizado com monolith)
   useEffect(() => {
     const loadState = () => {
       const storedUserInfo = localStorage.getItem("userInfo");
@@ -24,41 +25,44 @@ const Header = () => {
     };
 
     loadState();
-
-    // Escutar mudanças no localStorage
     window.addEventListener("storage", loadState);
     return () => window.removeEventListener("storage", loadState);
   }, []);
 
-  const navigateMonolith = (path) => {
-    const iframe = document.querySelector('iframe[title="ProShop Content"]');
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: "navigate", path }, "http://localhost:3001");
+  const navigateToRoute = (path) => {
+    // Rotas MFE usam React Router da Shell
+    if (['/login', '/register', '/profile'].includes(path)) {
+      navigate(path);
+    } else {
+      // Outras rotas vão para o iframe
+      const iframe = document.querySelector('iframe[title="ProShop Content"]');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: "navigate", path }, "http://localhost:3001");
+      }
     }
   };
 
   const logoutHandler = () => {
-    // Limpar localStorage
     localStorage.removeItem("userInfo");
     localStorage.removeItem("cart");
     setUserInfo(null);
     setCartItems([]);
-    navigateMonolith("/login");
+    navigate("/login");
   };
 
   return (
     <header>
       <Navbar bg="primary" variant="dark" expand="lg" collapseOnSelect>
         <Container>
-          <Navbar.Brand onClick={() => navigateMonolith("/")} style={{ cursor: "pointer" }}>
-            <img src={logo} alt="ProShop" />
+          <Navbar.Brand onClick={() => navigateToRoute("/")} style={{ cursor: "pointer" }}>
+            <img src={logo} alt="ProShop" style={{ marginRight: "10px" }} />
             ProShop
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              <SearchBox onSearch={(keyword) => navigateMonolith(`/search/${keyword}`)} />
-              <Nav.Link onClick={() => navigateMonolith("/cart")}>
+              <SearchBox onSearch={(keyword) => navigateToRoute(`/search/${keyword}`)} />
+              <Nav.Link onClick={() => navigateToRoute("/cart")}>
                 <FaShoppingCart /> Cart
                 {cartItems.length > 0 && (
                   <Badge pill bg="success" style={{ marginLeft: "5px" }}>
@@ -69,7 +73,7 @@ const Header = () => {
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id="username">
-                    <NavDropdown.Item onClick={() => navigateMonolith("/profile")}>
+                    <NavDropdown.Item onClick={() => navigateToRoute("/profile")}>
                       Profile
                     </NavDropdown.Item>
                     <NavDropdown.Item onClick={logoutHandler}>
@@ -78,21 +82,19 @@ const Header = () => {
                   </NavDropdown>
                 </>
               ) : (
-                <Nav.Link onClick={() => navigateMonolith("/login")}>
+                <Nav.Link onClick={() => navigateToRoute("/login")}>
                   <FaUser /> Sign In
                 </Nav.Link>
               )}
-
-              {/* Admin Links */}
               {userInfo && userInfo.isAdmin && (
                 <NavDropdown title="Admin" id="adminmenu">
-                  <NavDropdown.Item onClick={() => navigateMonolith("/admin/productlist")}>
+                  <NavDropdown.Item onClick={() => navigateToRoute("/admin/productlist")}>
                     Products
                   </NavDropdown.Item>
-                  <NavDropdown.Item onClick={() => navigateMonolith("/admin/orderlist")}>
+                  <NavDropdown.Item onClick={() => navigateToRoute("/admin/orderlist")}>
                     Orders
                   </NavDropdown.Item>
-                  <NavDropdown.Item onClick={() => navigateMonolith("/admin/userlist")}>
+                  <NavDropdown.Item onClick={() => navigateToRoute("/admin/userlist")}>
                     Users
                   </NavDropdown.Item>
                 </NavDropdown>
