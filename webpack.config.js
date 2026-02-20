@@ -44,6 +44,7 @@ module.exports = {
       name: "shell",
       remotes: {
         mfeAuth: "mfeAuth@http://localhost:4201/remoteEntry.js",
+        mfeSupport: "mfeSupport@http://localhost:4202/remoteEntry.js",
       },
       shared: {
         react: { singleton: true, requiredVersion: false },

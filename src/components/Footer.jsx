@@ -1,14 +1,30 @@
 import { Container, Row, Col } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
 
   return (
     <footer>
       <Container>
         <Row>
           <Col className="text-center py-3">
-            <p>ProShop &copy; {currentYear}</p>
+            <p>
+              ProShop &copy; {currentYear} | 
+              <span 
+                onClick={() => navigate("/help")} 
+                style={{ marginLeft: "10px", cursor: "pointer", textDecoration: "underline" }}
+              >
+                Help Center
+              </span> | 
+              <span 
+                onClick={() => navigate("/contact")} 
+                style={{ marginLeft: "10px", cursor: "pointer", textDecoration: "underline" }}
+              >
+                Contact Us
+              </span>
+            </p>
           </Col>
         </Row>
       </Container>
