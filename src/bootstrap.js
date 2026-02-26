@@ -19,28 +19,49 @@ const ProfileScreen = lazy(() => import("mfeAuth/ProfileScreen"));
 const HelpCenter = lazy(() => import("mfeSupport/HelpCenter"));
 const ContactUs = lazy(() => import("mfeSupport/ContactUs"));
 
+// Lazy load mfe-catalog
+const HomeScreen = lazy(() => import("mfeCatalog/HomeScreen"));
+const ProductScreen = lazy(() => import("mfeCatalog/ProductScreen"));
+
 const AppContent = () => {
   const location = useLocation();
   
   // Rotas geridas por MFEs
-  const mfeRoutes = ['/login', '/register', '/profile', '/help', '/contact'];
-  const isMFERoute = mfeRoutes.includes(location.pathname);
+  const mfeRoutes = [
+    '/login', '/register', '/profile',
+    '/help', '/contact',
+    '/', '/product', '/search', '/page'
+  ];
+  
+  const isMFERoute = mfeRoutes.some(route => 
+    location.pathname === route || location.pathname.startsWith(route)
+  );
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <Header />
       <main style={{ 
         flexGrow: 1, 
-        overflow: isMFERoute ? "auto" : "hidden" // Auto para MFEs, hidden para iframe
+        overflow: isMFERoute ? "auto" : "hidden"
       }}>
         <Suspense fallback={<Loader />}>
           {isMFERoute ? (
             <Routes>
+              {/* Auth */}
               <Route path="/login" element={<LoginScreen />} />
               <Route path="/register" element={<RegisterScreen />} />
               <Route path="/profile" element={<ProfileScreen />} />
+              
+              {/* Support */}
               <Route path="/help" element={<HelpCenter />} />
               <Route path="/contact" element={<ContactUs />} />
+              
+              {/* Catalog */}
+              <Route path="/" element={<HomeScreen />} />
+              <Route path="/search/:keyword" element={<HomeScreen />} />
+              <Route path="/page/:pageNumber" element={<HomeScreen />} />
+              <Route path="/search/:keyword/page/:pageNumber" element={<HomeScreen />} />
+              <Route path="/product/:id" element={<ProductScreen />} />
             </Routes>
           ) : (
             <MonolithFrame />
