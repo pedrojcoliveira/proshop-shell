@@ -2,6 +2,7 @@ import { StrictMode, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Provider } from "react-redux";
+import { HelmetProvider } from "react-helmet-async";
 import store from "./store";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -38,12 +39,9 @@ const AppContent = () => {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
-      <main style={{ 
-        flexGrow: 1, 
-        overflow: isMFERoute ? "auto" : "hidden"
-      }}>
+      <main style={{ flex: 1 }}>
         <Suspense fallback={<Loader />}>
           {isMFERoute ? (
             <Routes>
@@ -75,11 +73,13 @@ const AppContent = () => {
 
 const App = () => {
   return (
-    <Provider store={store}>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </Provider>
+    <HelmetProvider>
+      <Provider store={store}>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </Provider>
+    </HelmetProvider>
   );
 };
 
