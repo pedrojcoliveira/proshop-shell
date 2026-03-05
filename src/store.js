@@ -1,15 +1,9 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
-
-// Slice placeholder para o store não ficar vazio
-const shellSlice = createSlice({
-  name: "shell",
-  initialState: {},
-  reducers: {},
-});
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./slices/authSlice";
 
 const store = configureStore({
   reducer: {
-    shell: shellSlice.reducer,
+    auth: authReducer,
   },
   devTools: true,
 });

@@ -8,6 +8,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import MonolithFrame from "./components/MonolithFrame";
 import Loader from "./components/Loader";
+import PrivateRoute from "./components/PrivateRoute";
 import "./assets/styles/bootstrap.custom.css";
 import "./assets/styles/index.css";
 
@@ -27,16 +28,17 @@ const ProductScreen = lazy(() => import("mfeCatalog/ProductScreen"));
 const AppContent = () => {
   const location = useLocation();
   
-  // Rotas geridas por MFEs
-  const mfeRoutes = [
-    '/login', '/register', '/profile',
-    '/help', '/contact',
-    '/', '/product', '/search', '/page'
-  ];
-  
-  const isMFERoute = mfeRoutes.some(route => 
-    location.pathname === route || location.pathname.startsWith(route)
-  );
+// Rotas geridas por MFEs - verificação explícita
+const isMFERoute = 
+  location.pathname === '/' ||
+  location.pathname === '/login' ||
+  location.pathname === '/register' ||
+  location.pathname === '/profile' ||
+  location.pathname === '/help' ||
+  location.pathname === '/contact' ||
+  location.pathname.startsWith('/product/') ||
+  location.pathname.startsWith('/search/') ||
+  location.pathname.startsWith('/page/');
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -45,21 +47,21 @@ const AppContent = () => {
         <Suspense fallback={<Loader />}>
           {isMFERoute ? (
             <Routes>
-              {/* Auth */}
+              {/* Public routes */}
               <Route path="/login" element={<LoginScreen />} />
               <Route path="/register" element={<RegisterScreen />} />
-              <Route path="/profile" element={<ProfileScreen />} />
-              
-              {/* Support */}
               <Route path="/help" element={<HelpCenter />} />
               <Route path="/contact" element={<ContactUs />} />
-              
-              {/* Catalog */}
               <Route path="/" element={<HomeScreen />} />
               <Route path="/search/:keyword" element={<HomeScreen />} />
               <Route path="/page/:pageNumber" element={<HomeScreen />} />
               <Route path="/search/:keyword/page/:pageNumber" element={<HomeScreen />} />
               <Route path="/product/:id" element={<ProductScreen />} />
+              
+              {/* Private routes */}
+              <Route path="" element={<PrivateRoute />}>
+                <Route path="/profile" element={<ProfileScreen />} />
+              </Route>
             </Routes>
           ) : (
             <MonolithFrame />

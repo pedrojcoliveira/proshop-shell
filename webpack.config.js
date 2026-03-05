@@ -3,11 +3,11 @@ const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPl
 
 module.exports = {
   entry: "./src/index.js",
-  devServer: { 
+  devServer: {
     port: 3000,
     historyApiFallback: true,
   },
-  output: { 
+  output: {
     publicPath: "http://localhost:3000/",
     clean: true,
   },
