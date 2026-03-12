@@ -11,18 +11,12 @@ const Footer = () => {
         <Row>
           <Col className="text-center py-3">
             <p>
-              ProShop &copy; {currentYear} | 
-              <span 
-                onClick={() => navigate("/help")} 
+              ProShop &copy; {currentYear} |
+              <span
+                onClick={() => navigate("/help")}
                 style={{ marginLeft: "10px", cursor: "pointer", textDecoration: "underline" }}
               >
                 Help Center
-              </span> | 
-              <span 
-                onClick={() => navigate("/contact")} 
-                style={{ marginLeft: "10px", cursor: "pointer", textDecoration: "underline" }}
-              >
-                Contact Us
               </span>
             </p>
           </Col>

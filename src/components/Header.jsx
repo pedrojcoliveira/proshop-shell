@@ -31,10 +31,16 @@ const Header = () => {
 
   const navigateToRoute = (path) => {
     // Rotas MFE usam React Router da Shell
-    if (['/login', '/register', '/profile'].includes(path)) {
+    if (
+        ['/user/login', '/user/register', '/user/profile', '/'].includes(path) ||
+        path.startsWith('/catalog/') ||
+        path.startsWith('/user/') ||
+        path.startsWith('/orders/') ||
+        path.startsWith('/admin/')
+      ) {
       navigate(path);
     } else {
-      // Outras rotas vão para o iframe
+      // Outras rotas vï¿½o para o iframe
       const iframe = document.querySelector('iframe[title="ProShop Content"]');
       if (iframe && iframe.contentWindow) {
         iframe.contentWindow.postMessage({ type: "navigate", path }, "http://localhost:3001");
@@ -47,7 +53,7 @@ const Header = () => {
     localStorage.removeItem("cart");
     setUserInfo(null);
     setCartItems([]);
-    navigate("/login");
+    navigate("/user/login");
   };
 
   return (
@@ -61,8 +67,8 @@ const Header = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              <SearchBox onSearch={(keyword) => navigateToRoute(`/search/${keyword}`)} />
-              <Nav.Link onClick={() => navigateToRoute("/cart")}>
+              <SearchBox onSearch={(keyword) => navigateToRoute(`/catalog/search/${keyword}`)} />
+              <Nav.Link onClick={() => navigateToRoute("/orders/cart")}>
                 <FaShoppingCart /> Cart
                 {cartItems.length > 0 && (
                   <Badge pill bg="success" style={{ marginLeft: "5px" }}>
@@ -73,7 +79,7 @@ const Header = () => {
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id="username">
-                    <NavDropdown.Item onClick={() => navigateToRoute("/profile")}>
+                    <NavDropdown.Item onClick={() => navigateToRoute("/user/profile")}>
                       Profile
                     </NavDropdown.Item>
                     <NavDropdown.Item onClick={logoutHandler}>
@@ -82,7 +88,7 @@ const Header = () => {
                   </NavDropdown>
                 </>
               ) : (
-                <Nav.Link onClick={() => navigateToRoute("/login")}>
+                <Nav.Link onClick={() => navigateToRoute("/user/login")}>
                   <FaUser /> Sign In
                 </Nav.Link>
               )}

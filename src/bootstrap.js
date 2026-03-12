@@ -1,72 +1,74 @@
-import { StrictMode, lazy, Suspense } from "react";
+import { StrictMode, lazy, Suspense, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { HelmetProvider } from "react-helmet-async";
 import store from "./store";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import MonolithFrame from "./components/MonolithFrame";
-import Loader from "./components/Loader";
+import Loader from "./components/Loader"; 
 import PrivateRoute from "./components/PrivateRoute";
 import "./assets/styles/bootstrap.custom.css";
 import "./assets/styles/index.css";
 
-// Lazy load mfe-auth
-const LoginScreen = lazy(() => import("mfeAuth/LoginScreen"));
-const RegisterScreen = lazy(() => import("mfeAuth/RegisterScreen"));
-const ProfileScreen = lazy(() => import("mfeAuth/ProfileScreen"));
+// Lazy load mfe-auth and profile
+const UserManagement = lazy(() => import("mfeAuth/UserManagementApp"));
 
 // Lazy load mfe-support
 const HelpCenter = lazy(() => import("mfeSupport/HelpCenter"));
-const ContactUs = lazy(() => import("mfeSupport/ContactUs"));
 
-// Lazy load mfe-catalog
-const HomeScreen = lazy(() => import("mfeCatalog/HomeScreen"));
-const ProductScreen = lazy(() => import("mfeCatalog/ProductScreen"));
+// Lazy load mfe-catalog and product
+const HomeCatalog = lazy(() => import("mfeCatalog/HomeScreen"));
+
+// Lazy load mfe-monolith (orders + admin)
+const OrdersApp = lazy(() => import("mfeMonolith/OrdersApp"));
+const AdminApp = lazy(() => import("mfeMonolith/AdminApp"));
 
 const AppContent = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   
-// Rotas geridas por MFEs - verificação explícita
-const isMFERoute = 
-  location.pathname === '/' ||
-  location.pathname === '/login' ||
-  location.pathname === '/register' ||
-  location.pathname === '/profile' ||
-  location.pathname === '/help' ||
-  location.pathname === '/contact' ||
-  location.pathname.startsWith('/product/') ||
-  location.pathname.startsWith('/search/') ||
-  location.pathname.startsWith('/page/');
+  // Escutar mensagens de navega��o do iframe
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.origin !== 'http://localhost:3001') return;
+      
+      if (event.data.type === 'NAVIGATE') {
+        console.log('Shell recebeu pedido de navega��o:', event.data.path);
+        navigate(event.data.path);
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [navigate]);
+  
+  // Rotas geridas por MFEs - verificação explícita
+/*  const isMFERoute =
+    location.pathname === '/' ||
+    location.pathname === '/login' ||
+    location.pathname === '/register' ||
+    location.pathname === '/profile' ||
+    location.pathname === '/help' ||
+    
+    location.pathname.startsWith('/product/') ||
+    location.pathname.startsWith('/search/') ||
+    location.pathname.startsWith('/page/'); */
+
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
       <main style={{ flex: 1 }}>
-        <Suspense fallback={<Loader />}>
-          {isMFERoute ? (
-            <Routes>
-              {/* Public routes */}
-              <Route path="/login" element={<LoginScreen />} />
-              <Route path="/register" element={<RegisterScreen />} />
-              <Route path="/help" element={<HelpCenter />} />
-              <Route path="/contact" element={<ContactUs />} />
-              <Route path="/" element={<HomeScreen />} />
-              <Route path="/search/:keyword" element={<HomeScreen />} />
-              <Route path="/page/:pageNumber" element={<HomeScreen />} />
-              <Route path="/search/:keyword/page/:pageNumber" element={<HomeScreen />} />
-              <Route path="/product/:id" element={<ProductScreen />} />
-              
-              {/* Private routes */}
-              <Route path="" element={<PrivateRoute />}>
-                <Route path="/profile" element={<ProfileScreen />} />
-              </Route>
-            </Routes>
-          ) : (
-            <MonolithFrame />
-          )}
-        </Suspense>
+        <Routes>
+          <Route path="/" element={<Navigate to="/catalog" replace />} />
+          <Route path="/user/*" element={<Suspense fallback={<Loader />}><UserManagement /></Suspense>} />
+          <Route path="/catalog/*" element={<Suspense fallback={<Loader />}><HomeCatalog /></Suspense>} />
+          <Route path="/orders/*" element={<Suspense fallback={<Loader />}><OrdersApp /></Suspense>} />
+          <Route path="/admin/*" element={<Suspense fallback={<Loader />}><AdminApp /></Suspense>} />
+          <Route path="/help/*" element={<Suspense fallback={<Loader />}><HelpCenter /></Suspense>} />
+        </Routes>
       </main>
       <Footer />
     </div>
