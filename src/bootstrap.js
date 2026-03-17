@@ -21,8 +21,10 @@ const HelpCenter = lazy(() => import("mfeSupport/HelpCenter"));
 // Lazy load mfe-catalog and product
 const HomeCatalog = lazy(() => import("mfeCatalog/HomeScreen"));
 
-// Lazy load mfe-monolith (orders + admin)
-const OrdersApp = lazy(() => import("mfeMonolith/OrdersApp"));
+// Lazy load mfe-orders
+const OrdersApp = lazy(() => import("mfeOrders/OrdersApp"));
+
+// Lazy load mfe-monolith (admin)
 const AdminApp = lazy(() => import("mfeMonolith/AdminApp"));
 
 const AppContent = () => {
