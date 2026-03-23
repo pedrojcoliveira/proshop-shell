@@ -6,9 +6,7 @@ import { HelmetProvider } from "react-helmet-async";
 import store from "./store";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import MonolithFrame from "./components/MonolithFrame";
-import Loader from "./components/Loader"; 
-import PrivateRoute from "./components/PrivateRoute";
+import Loader from "./components/Loader";
 import "./assets/styles/bootstrap.custom.css";
 import "./assets/styles/index.css";
 
@@ -24,8 +22,11 @@ const HomeCatalog = lazy(() => import("mfeCatalog/HomeScreen"));
 // Lazy load mfe-orders
 const OrdersApp = lazy(() => import("mfeOrders/OrdersApp"));
 
-// Lazy load mfe-monolith (admin)
-const AdminApp = lazy(() => import("mfeMonolith/AdminApp"));
+// Lazy load mfe-admin
+const AdminApp = lazy(() => import("mfeAdmin/AdminApp"));
+
+// Lazy load mfe-wishlist
+const WishlistApp = lazy(() => import("mfeWishlist/WishlistApp"));
 
 const AppContent = () => {
   const location = useLocation();
@@ -69,6 +70,7 @@ const AppContent = () => {
           <Route path="/catalog/*" element={<Suspense fallback={<Loader />}><HomeCatalog /></Suspense>} />
           <Route path="/orders/*" element={<Suspense fallback={<Loader />}><OrdersApp /></Suspense>} />
           <Route path="/admin/*" element={<Suspense fallback={<Loader />}><AdminApp /></Suspense>} />
+          <Route path="/wishlist/*" element={<Suspense fallback={<Loader />}><WishlistApp /></Suspense>} />
           <Route path="/help/*" element={<Suspense fallback={<Loader />}><HelpCenter /></Suspense>} />
         </Routes>
       </main>

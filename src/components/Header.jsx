@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Navbar, Nav, Container, NavDropdown, Badge } from "react-bootstrap";
-import { FaShoppingCart, FaUser } from "react-icons/fa";
+import { FaShoppingCart, FaUser, FaHeart } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import SearchBox from "./SearchBox";
 import logo from "../assets/logo.png";
@@ -8,6 +8,7 @@ import logo from "../assets/logo.png";
 const Header = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,9 +25,19 @@ const Header = () => {
       }
     };
 
+    const loadWishlist = () => {
+      const stored = JSON.parse(localStorage.getItem('wishlist') || '[]');
+      setWishlistCount(stored.length);
+    };
+
     loadState();
+    loadWishlist();
     window.addEventListener("storage", loadState);
-    return () => window.removeEventListener("storage", loadState);
+    window.addEventListener("wishlistUpdated", loadWishlist);
+    return () => {
+      window.removeEventListener("storage", loadState);
+      window.removeEventListener("wishlistUpdated", loadWishlist);
+    };
   }, []);
 
   const navigateToRoute = (path) => {
@@ -36,7 +47,8 @@ const Header = () => {
         path.startsWith('/catalog/') ||
         path.startsWith('/user/') ||
         path.startsWith('/orders/') ||
-        path.startsWith('/admin/')
+        path.startsWith('/admin/') ||
+        path.startsWith('/wishlist')
       ) {
       navigate(path);
     } else {
@@ -68,6 +80,16 @@ const Header = () => {
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
               <SearchBox onSearch={(keyword) => navigateToRoute(`/catalog/search/${keyword}`)} />
+              {userInfo && (
+                <Nav.Link onClick={() => navigateToRoute("/wishlist")}>
+                  <FaHeart /> Wishlist
+                  {wishlistCount > 0 && (
+                    <Badge pill bg="danger" style={{ marginLeft: "5px" }}>
+                      {wishlistCount}
+                    </Badge>
+                  )}
+                </Nav.Link>
+              )}
               <Nav.Link onClick={() => navigateToRoute("/orders/cart")}>
                 <FaShoppingCart /> Cart
                 {cartItems.length > 0 && (

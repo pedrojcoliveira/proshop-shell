@@ -46,8 +46,9 @@ module.exports = {
         mfeAuth: "mfeAuth@http://localhost:4201/remoteEntry.js",
         mfeSupport: "mfeSupport@http://localhost:4202/remoteEntry.js",
         mfeCatalog: "mfeCatalog@http://localhost:4203/remoteEntry.js",
-        mfeMonolith: "mfeMonolith@http://localhost:4204/remoteEntry.js",
         mfeOrders: "mfeOrders@http://localhost:4205/remoteEntry.js",
+        mfeWishlist: "mfeWishlist@http://localhost:4206/remoteEntry.js",
+        mfeAdmin: "mfeAdmin@http://localhost:4207/remoteEntry.js",
       },
       shared: {
         react: { singleton: true, requiredVersion: false },
