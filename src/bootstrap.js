@@ -1,8 +1,10 @@
-import { StrictMode, lazy, Suspense, useEffect } from "react";
+import './eventBus'; 
+import { StrictMode, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Provider } from "react-redux";
 import { HelmetProvider } from "react-helmet-async";
+import { Container } from "react-bootstrap";
 import store from "./store";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -29,50 +31,21 @@ const AdminApp = lazy(() => import("mfeAdmin/AdminApp"));
 const WishlistApp = lazy(() => import("mfeWishlist/WishlistApp"));
 
 const AppContent = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  
-  // Escutar mensagens de navega��o do iframe
-  useEffect(() => {
-    const handleMessage = (event) => {
-      if (event.origin !== 'http://localhost:3001') return;
-      
-      if (event.data.type === 'NAVIGATE') {
-        console.log('Shell recebeu pedido de navega��o:', event.data.path);
-        navigate(event.data.path);
-      }
-    };
-    
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [navigate]);
-  
-  // Rotas geridas por MFEs - verificação explícita
-/*  const isMFERoute =
-    location.pathname === '/' ||
-    location.pathname === '/login' ||
-    location.pathname === '/register' ||
-    location.pathname === '/profile' ||
-    location.pathname === '/help' ||
-    
-    location.pathname.startsWith('/product/') ||
-    location.pathname.startsWith('/search/') ||
-    location.pathname.startsWith('/page/'); */
-
-
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
       <Header />
-      <main style={{ flex: 1 }}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/catalog" replace />} />
-          <Route path="/user/*" element={<Suspense fallback={<Loader />}><UserManagement /></Suspense>} />
-          <Route path="/catalog/*" element={<Suspense fallback={<Loader />}><HomeCatalog /></Suspense>} />
-          <Route path="/orders/*" element={<Suspense fallback={<Loader />}><OrdersApp /></Suspense>} />
-          <Route path="/admin/*" element={<Suspense fallback={<Loader />}><AdminApp /></Suspense>} />
-          <Route path="/wishlist/*" element={<Suspense fallback={<Loader />}><WishlistApp /></Suspense>} />
-          <Route path="/help/*" element={<Suspense fallback={<Loader />}><HelpCenter /></Suspense>} />
-        </Routes>
+      <main className="py-3" style={{ flex: 1 }}>
+        <Container>
+          <Routes>
+            <Route path="/" element={<Navigate to="/catalog" replace />} />
+            <Route path="/user/*" element={<Suspense fallback={<Loader />}><UserManagement /></Suspense>} />
+            <Route path="/catalog/*" element={<Suspense fallback={<Loader />}><HomeCatalog /></Suspense>} />
+            <Route path="/orders/*" element={<Suspense fallback={<Loader />}><OrdersApp /></Suspense>} />
+            <Route path="/admin/*" element={<Suspense fallback={<Loader />}><AdminApp /></Suspense>} />
+            <Route path="/wishlist/*" element={<Suspense fallback={<Loader />}><WishlistApp /></Suspense>} />
+            <Route path="/help/*" element={<Suspense fallback={<Loader />}><HelpCenter /></Suspense>} />
+          </Routes>
+        </Container>
       </main>
       <Footer />
     </div>

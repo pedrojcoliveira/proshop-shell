@@ -9,56 +9,42 @@ const Header = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [stockAlert, setStockAlert] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadState = () => {
       const storedUserInfo = localStorage.getItem("userInfo");
       const storedCart = localStorage.getItem("cart");
-      
-      if (storedUserInfo) {
-        setUserInfo(JSON.parse(storedUserInfo));
-      }
-      if (storedCart) {
-        const cartData = JSON.parse(storedCart);
-        setCartItems(cartData.cartItems || []);
-      }
+      if (storedUserInfo) setUserInfo(JSON.parse(storedUserInfo));
+      if (storedCart) setCartItems(JSON.parse(storedCart).cartItems || []);
     };
 
-    const loadWishlist = () => {
-      const stored = JSON.parse(localStorage.getItem('wishlist') || '[]');
-      setWishlistCount(stored.length);
+    const handleUserChanged = (e) => {
+      setUserInfo(e.detail.userInfo);
+    };
+
+    const handleWishlistUpdated = (e) => {
+      setWishlistCount(e.detail.count);
+    };
+
+    // Header subscreve o Event Bus para notificações de stock
+    const handleStockEmpty = (e) => {
+      setStockAlert(`"${e.detail.productName}" está esgotado`);
+      setTimeout(() => setStockAlert(null), 5000); // desaparece após 5 segundos
     };
 
     loadState();
-    loadWishlist();
-    window.addEventListener("storage", loadState);
-    window.addEventListener("wishlistUpdated", loadWishlist);
+    setWishlistCount(JSON.parse(localStorage.getItem('wishlist') || '[]').length);
+    window.addEventListener("userChanged", handleUserChanged);
+    window.addEventListener("wishlistUpdated", handleWishlistUpdated);
+    if (window.__eventBus) window.__eventBus.subscribe('stockEmpty', handleStockEmpty);
     return () => {
-      window.removeEventListener("storage", loadState);
-      window.removeEventListener("wishlistUpdated", loadWishlist);
+      window.removeEventListener("userChanged", handleUserChanged);
+      window.removeEventListener("wishlistUpdated", handleWishlistUpdated);
+      if (window.__eventBus) window.__eventBus.unsubscribe('stockEmpty', handleStockEmpty);
     };
   }, []);
-
-  const navigateToRoute = (path) => {
-    // Rotas MFE usam React Router da Shell
-    if (
-        ['/user/login', '/user/register', '/user/profile', '/'].includes(path) ||
-        path.startsWith('/catalog/') ||
-        path.startsWith('/user/') ||
-        path.startsWith('/orders/') ||
-        path.startsWith('/admin/') ||
-        path.startsWith('/wishlist')
-      ) {
-      navigate(path);
-    } else {
-      // Outras rotas v�o para o iframe
-      const iframe = document.querySelector('iframe[title="ProShop Content"]');
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "navigate", path }, "http://localhost:3001");
-      }
-    }
-  };
 
   const logoutHandler = () => {
     localStorage.removeItem("userInfo");
@@ -70,18 +56,29 @@ const Header = () => {
 
   return (
     <header>
+      {stockAlert && (
+        <div style={{
+          backgroundColor: '#fff3cd',
+          borderBottom: '1px solid #ffc107',
+          padding: '8px 16px',
+          textAlign: 'center',
+          fontSize: '0.9rem',
+        }}>
+          ⚠️ {stockAlert}
+        </div>
+      )}
       <Navbar bg="primary" variant="dark" expand="lg" collapseOnSelect>
         <Container>
-          <Navbar.Brand onClick={() => navigateToRoute("/")} style={{ cursor: "pointer" }}>
+          <Navbar.Brand onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
             <img src={logo} alt="ProShop" style={{ marginRight: "10px" }} />
             ProShop
           </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
             <Nav className="ms-auto">
-              <SearchBox onSearch={(keyword) => navigateToRoute(`/catalog/search/${keyword}`)} />
+              <SearchBox onSearch={(keyword) => navigate(`/catalog/search/${keyword}`)} />
               {userInfo && (
-                <Nav.Link onClick={() => navigateToRoute("/wishlist")}>
+                <Nav.Link onClick={() => navigate("/wishlist")}>
                   <FaHeart /> Wishlist
                   {wishlistCount > 0 && (
                     <Badge pill bg="danger" style={{ marginLeft: "5px" }}>
@@ -90,7 +87,7 @@ const Header = () => {
                   )}
                 </Nav.Link>
               )}
-              <Nav.Link onClick={() => navigateToRoute("/orders/cart")}>
+              <Nav.Link onClick={() => navigate("/orders/cart")}>
                 <FaShoppingCart /> Cart
                 {cartItems.length > 0 && (
                   <Badge pill bg="success" style={{ marginLeft: "5px" }}>
@@ -101,7 +98,7 @@ const Header = () => {
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id="username">
-                    <NavDropdown.Item onClick={() => navigateToRoute("/user/profile")}>
+                    <NavDropdown.Item onClick={() => navigate("/user/profile")}>
                       Profile
                     </NavDropdown.Item>
                     <NavDropdown.Item onClick={logoutHandler}>
@@ -110,19 +107,19 @@ const Header = () => {
                   </NavDropdown>
                 </>
               ) : (
-                <Nav.Link onClick={() => navigateToRoute("/user/login")}>
+                <Nav.Link onClick={() => navigate("/user/login")}>
                   <FaUser /> Sign In
                 </Nav.Link>
               )}
               {userInfo && userInfo.isAdmin && (
                 <NavDropdown title="Admin" id="adminmenu">
-                  <NavDropdown.Item onClick={() => navigateToRoute("/admin/productlist")}>
+                  <NavDropdown.Item onClick={() => navigate("/admin/productlist")}>
                     Products
                   </NavDropdown.Item>
-                  <NavDropdown.Item onClick={() => navigateToRoute("/admin/orderlist")}>
+                  <NavDropdown.Item onClick={() => navigate("/admin/orderlist")}>
                     Orders
                   </NavDropdown.Item>
-                  <NavDropdown.Item onClick={() => navigateToRoute("/admin/userlist")}>
+                  <NavDropdown.Item onClick={() => navigate("/admin/userlist")}>
                     Users
                   </NavDropdown.Item>
                 </NavDropdown>

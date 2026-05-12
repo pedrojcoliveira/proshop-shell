@@ -6,6 +6,10 @@ module.exports = {
   devServer: {
     port: 3000,
     historyApiFallback: true,
+    proxy: {
+      '/api': { target: 'http://localhost:5000', changeOrigin: true },
+      '/uploads': { target: 'http://localhost:5000', changeOrigin: true },
+    },
   },
   output: {
     publicPath: "http://localhost:3000/",
