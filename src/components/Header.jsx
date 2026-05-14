@@ -1,47 +1,40 @@
-import { useState, useEffect } from "react";
-import { Navbar, Nav, Container, NavDropdown, Badge } from "react-bootstrap";
-import { FaShoppingCart, FaUser, FaHeart } from "react-icons/fa";
+import { useState, useEffect, lazy, Suspense } from "react";
+import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
+import { FaShoppingCart, FaUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import SearchBox from "./SearchBox";
 import logo from "../assets/logo.png";
 
+const WishlistBadge = lazy(() =>
+  import('mfeWishlist/WishlistBadge').catch(() => ({ default: () => null }))
+);
+
 const Header = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [cartItems, setCartItems] = useState([]);
-  const [wishlistCount, setWishlistCount] = useState(0);
   const [stockAlert, setStockAlert] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const loadState = () => {
-      const storedUserInfo = localStorage.getItem("userInfo");
-      const storedCart = localStorage.getItem("cart");
-      if (storedUserInfo) setUserInfo(JSON.parse(storedUserInfo));
-      if (storedCart) setCartItems(JSON.parse(storedCart).cartItems || []);
-    };
+    // Estado inicial — lê do localStorage
+    const storedUserInfo = localStorage.getItem("userInfo");
+    const storedCart = localStorage.getItem("cart");
+    if (storedUserInfo) setUserInfo(JSON.parse(storedUserInfo));
+    if (storedCart) setCartItems(JSON.parse(storedCart).cartItems || []);
 
-    const handleUserChanged = (e) => {
-      setUserInfo(e.detail.userInfo);
-    };
+    // Custom Event userChanged — mfe-auth notifica após login/logout
+    const handleUserChanged = (e) => setUserInfo(e.detail.userInfo);
+    window.addEventListener("userChanged", handleUserChanged);
 
-    const handleWishlistUpdated = (e) => {
-      setWishlistCount(e.detail.count);
-    };
-
-    // Header subscreve o Event Bus para notificações de stock
+    // Event Bus stockEmpty — mfe-catalog notifica quando produto esgota
     const handleStockEmpty = (e) => {
       setStockAlert(`"${e.detail.productName}" está esgotado`);
-      setTimeout(() => setStockAlert(null), 5000); // desaparece após 5 segundos
+      setTimeout(() => setStockAlert(null), 5000);
     };
-
-    loadState();
-    setWishlistCount(JSON.parse(localStorage.getItem('wishlist') || '[]').length);
-    window.addEventListener("userChanged", handleUserChanged);
-    window.addEventListener("wishlistUpdated", handleWishlistUpdated);
     if (window.__eventBus) window.__eventBus.subscribe('stockEmpty', handleStockEmpty);
+
     return () => {
       window.removeEventListener("userChanged", handleUserChanged);
-      window.removeEventListener("wishlistUpdated", handleWishlistUpdated);
       if (window.__eventBus) window.__eventBus.unsubscribe('stockEmpty', handleStockEmpty);
     };
   }, []);
@@ -79,20 +72,24 @@ const Header = () => {
               <SearchBox onSearch={(keyword) => navigate(`/catalog/search/${keyword}`)} />
               {userInfo && (
                 <Nav.Link onClick={() => navigate("/wishlist")}>
-                  <FaHeart /> Wishlist
-                  {wishlistCount > 0 && (
-                    <Badge pill bg="danger" style={{ marginLeft: "5px" }}>
-                      {wishlistCount}
-                    </Badge>
-                  )}
+                  <Suspense fallback={null}>
+                    <WishlistBadge />
+                  </Suspense>
                 </Nav.Link>
               )}
               <Nav.Link onClick={() => navigate("/orders/cart")}>
                 <FaShoppingCart /> Cart
                 {cartItems.length > 0 && (
-                  <Badge pill bg="success" style={{ marginLeft: "5px" }}>
+                  <span style={{
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    borderRadius: '50%',
+                    padding: '2px 6px',
+                    fontSize: '0.75rem',
+                    marginLeft: '5px'
+                  }}>
                     {cartItems.reduce((a, c) => a + c.qty, 0)}
-                  </Badge>
+                  </span>
                 )}
               </Nav.Link>
               {userInfo ? (
