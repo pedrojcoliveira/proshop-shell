@@ -1,6 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
-import { FaShoppingCart, FaUser } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import SearchBox from "./SearchBox";
 import logo from "../assets/logo.png";
@@ -9,18 +9,18 @@ const WishlistBadge = lazy(() =>
   import('mfeWishlist/WishlistBadge').catch(() => ({ default: () => null }))
 );
 
+const CartBadge = lazy(() =>
+  import('mfeOrders/CartBadge').catch(() => ({ default: () => null }))
+);
+
 const Header = () => {
   const [userInfo, setUserInfo] = useState(null);
-  const [cartItems, setCartItems] = useState([]);
   const [stockAlert, setStockAlert] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Estado inicial — lê do localStorage
     const storedUserInfo = localStorage.getItem("userInfo");
-    const storedCart = localStorage.getItem("cart");
     if (storedUserInfo) setUserInfo(JSON.parse(storedUserInfo));
-    if (storedCart) setCartItems(JSON.parse(storedCart).cartItems || []);
 
     // Custom Event userChanged — mfe-auth notifica após login/logout
     const handleUserChanged = (e) => setUserInfo(e.detail.userInfo);
@@ -43,7 +43,6 @@ const Header = () => {
     localStorage.removeItem("userInfo");
     localStorage.removeItem("cart");
     setUserInfo(null);
-    setCartItems([]);
     navigate("/user/login");
   };
 
@@ -78,19 +77,9 @@ const Header = () => {
                 </Nav.Link>
               )}
               <Nav.Link onClick={() => navigate("/orders/cart")}>
-                <FaShoppingCart /> Cart
-                {cartItems.length > 0 && (
-                  <span style={{
-                    backgroundColor: '#28a745',
-                    color: 'white',
-                    borderRadius: '50%',
-                    padding: '2px 6px',
-                    fontSize: '0.75rem',
-                    marginLeft: '5px'
-                  }}>
-                    {cartItems.reduce((a, c) => a + c.qty, 0)}
-                  </span>
-                )}
+                <Suspense fallback={null}>
+                  <CartBadge />
+                </Suspense>
               </Nav.Link>
               {userInfo ? (
                 <>
