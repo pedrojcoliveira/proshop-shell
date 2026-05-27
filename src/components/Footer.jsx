@@ -1,9 +1,12 @@
+import { lazy, Suspense } from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+
+const HelpCenterLink = lazy(() =>
+  import('mfeSupport/HelpCenterLink').catch(() => ({ default: () => null }))
+);
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const navigate = useNavigate();
 
   return (
     <footer>
@@ -12,12 +15,9 @@ const Footer = () => {
           <Col className="text-center py-3">
             <p>
               ProShop &copy; {currentYear} |
-              <span
-                onClick={() => navigate("/help")}
-                style={{ marginLeft: "10px", cursor: "pointer", textDecoration: "underline" }}
-              >
-                Help Center
-              </span>
+              <Suspense fallback={null}>
+                <HelpCenterLink />
+              </Suspense>
             </p>
           </Col>
         </Row>

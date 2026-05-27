@@ -1,12 +1,8 @@
 import { Navigate, Outlet } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import authService from 'mfeAuth/AuthService';
 
 const PrivateRoute = () => {
-  const { userInfo } = useSelector((state) => state.auth);
-  
-  console.log('PrivateRoute - userInfo:', userInfo); // DEBUG
-  
-  return userInfo ? <Outlet /> : <Navigate to='/login' replace />;
+  return authService.isAuthenticated() ? <Outlet /> : <Navigate to='/user/login' replace />;
 };
 
 export default PrivateRoute;

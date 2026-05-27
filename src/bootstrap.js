@@ -2,10 +2,8 @@ import './eventBus';
 import { StrictMode, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Provider } from "react-redux";
 import { HelmetProvider } from "react-helmet-async";
 import { Container } from "react-bootstrap";
-import store from "./store";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Loader from "./components/Loader";
@@ -55,11 +53,9 @@ const AppContent = () => {
 const App = () => {
   return (
     <HelmetProvider>
-      <Provider store={store}>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </Provider>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
     </HelmetProvider>
   );
 };
