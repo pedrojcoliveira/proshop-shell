@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import SearchBox from "./SearchBox";
@@ -21,35 +21,10 @@ const AdminMenu = lazy(() =>
 );
 
 const Header = () => {
-  const [stockAlert, setStockAlert] = useState(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Event Bus stockEmpty — mfe-catalog notifica quando produto esgota
-    const handleStockEmpty = (e) => {
-      setStockAlert(`"${e.detail.productName}" está esgotado`);
-      setTimeout(() => setStockAlert(null), 5000);
-    };
-    if (window.__eventBus) window.__eventBus.subscribe('stockEmpty', handleStockEmpty);
-
-    return () => {
-      if (window.__eventBus) window.__eventBus.unsubscribe('stockEmpty', handleStockEmpty);
-    };
-  }, []);
 
   return (
     <header>
-      {stockAlert && (
-        <div style={{
-          backgroundColor: '#fff3cd',
-          borderBottom: '1px solid #ffc107',
-          padding: '8px 16px',
-          textAlign: 'center',
-          fontSize: '0.9rem',
-        }}>
-          ⚠️ {stockAlert}
-        </div>
-      )}
       <Navbar bg="primary" variant="dark" expand="lg" collapseOnSelect>
         <Container>
           <Navbar.Brand onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
